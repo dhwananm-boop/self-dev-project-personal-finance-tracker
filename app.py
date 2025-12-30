@@ -20,10 +20,21 @@ class Expense(db.Model):
 with app.app_context():
     db.create_all()
 
+CATEGORIES = ["Food", "Transport", "Rent", "Utilities", "Health"]
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+
+    expenses = Expense.query.order_by(Expense.date.desc(), Expense.id.desc()).all()
+    total = round(sum(e.amount for e in expenses), 2)
+    return render_template(
+        
+        "index.html", 
+        expenses=expenses,
+        categories=CATEGORIES,
+        total=total
+
+        )
 
 @app.route("/add", methods=["POST"])
 def add():
@@ -57,6 +68,7 @@ def add():
     db.session.commit()
     flash("Expense added successfully!", "success")
     return redirect(url_for("index"))
+
 
 
 
