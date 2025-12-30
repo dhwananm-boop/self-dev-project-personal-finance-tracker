@@ -32,7 +32,7 @@ def index():
         "index.html", 
         expenses=expenses,
         categories=CATEGORIES,
-        total=total
+        total=total,
 
         )
 
@@ -70,7 +70,13 @@ def add():
     return redirect(url_for("index"))
 
 
-
+@app.route("/delete/<int:expense_id>", methods=["POST"])
+def delete(expense_id):
+    e = Expense.query.get_or_404(expense_id)
+    db.session.delete(e)
+    db.session.commit()
+    flash("Expense deleted successfully!", "success")
+    return redirect(url_for("index"))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=4848)
