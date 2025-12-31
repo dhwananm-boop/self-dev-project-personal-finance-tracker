@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date, datetime
+from sqlalchemy import func
 
 
 app = Flask(__name__)
@@ -26,7 +27,7 @@ def parse_date_or_none(s: str):
     if not s:
         return None
     try:
-        return datetime.strptime(s, "&Y-%m-%d").date()
+        return datetime.strptime(s, "%Y-%m-%d").date()
     except ValueError:
         return None
     
@@ -61,6 +62,27 @@ def index():
 
     expenses = q.order_by(Expense.date.desc(), Expense.id.desc()).all()
     total = round(sum(e.amount for e in expenses), 2)
+
+    cat_q = db.session.query(Expense.category, func.sum(Expense.amount))
+
+    if start_date:
+        cat_q = cat_q.filter(Expense.date >= start_date)
+    
+    if end_date:
+        cat_q = cat_q.filter(Expense.date <= end_date)
+
+    if selected_category:
+        cat_q = cat_q.filter(Expense.category == selected_category)
+
+    cat_rows = cat_q.group_by(Expense.category).all()
+    # print("Category Rows:", cat_rows)
+    cat_labels = [c for c, _ in cat_rows] # _ ignores the second value
+    # print("Category Labels:", cat_labels)
+    cat_values = [round(float(s or 0), 2) for _, s in cat_rows]
+    # print("Category Values:", cat_values)
+
+
+
     return render_template(
         
         "index.html", 
@@ -70,8 +92,9 @@ def index():
         total=total,
         start_str=start_str,
         end_str=end_str,
-        selected_category=selected_category
-        
+        selected_category=selected_category,
+        cat_labels=cat_labels,
+        cat_values=cat_values
 
         )
 

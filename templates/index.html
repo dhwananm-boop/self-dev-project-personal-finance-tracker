@@ -231,4 +231,42 @@
       </section>
     </main>
   </body>
+
+  <script>
+    const catLabels = {{ (cat_labels or []) | tojson }};
+    const catValues = {{ (cat_values or []) | tojson }};
+    
+    if (document.getElementById("catChart")) {
+      const catCtx = document.getElementById("catChart").getContext("2d");
+
+      new Chart(catCtx, {
+        type: "doughnut",
+        data: {
+          labels: catLabels,
+          datasets: [
+            {
+              data: catValues,
+              backgroundColor: [
+                "#3b82f6",
+                "#10b981",
+                "#f59e0b",
+                "#ef4444",
+                "#8b5cf6",
+                "#ec4899",
+                "#14b8a6",
+              ],
+            },
+          ],
+        },
+        options: {
+          plugins: {
+            legend: {
+              labels: { color: "#cbd5e1" },
+            },
+          },
+        },
+      });
+    }
+  </script>
+
 </html>
