@@ -190,6 +190,19 @@
                 <td class="px-4 py-2">{{e.category}}</td>
                 <td class="px-4 py-2 text-right">${{ '%.2f'|format(e.amount) }}</td>
                 <td class="px-4 py-2 text-right">
+                  
+                  <div class="inline-flex gap-2">
+                    <a class="
+                    text-sky-300 
+                    hover:text-sky-200
+                    text-xs
+                    border
+                    border-sky-400/30
+                    px-3
+                    py-1
+                    rounded-lg"
+                    href="{{url_for('edit', expense_id=e.id)}}">Edit</a>
+                                    
                   <form 
                   method="post" 
                   action="{{url_for('delete', expense_id=e.id)}}"
@@ -202,6 +215,7 @@
                     Delete
                   </button>
                   </form>
+                  </div>
                 </td>
               </tr>
               {% endfor %} {% else %}

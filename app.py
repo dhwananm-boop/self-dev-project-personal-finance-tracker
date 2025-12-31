@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response, flash, Response
 from flask_sqlalchemy import SQLAlchemy
-from datetime import date, datetime
+from datetime import date, datetime, date as dt_date
 from sqlalchemy import func
 
 
@@ -201,6 +201,44 @@ def export_csv():
     )
 
 
+@app.route("/edit/<int:expense_id>", methods=["GET"])
+def edit(expense_id):
+    e = Expense.query.get_or_404(expense_id)
+    return render_template("edit.html", expense=e, categories=CATEGORIES, today=dt_date.today().isoformat())
+
+@app.route("/edit/<int:expense_id>", methods=["POST"])
+def edit_post(expense_id):
+    e = Expense.query.get_or_404(expense_id)
+    
+    description = (request.form.get("description") or "").strip()
+    amount_str = (request.form.get("amount") or "").strip()
+    category = (request.form.get("category") or "").strip()
+    date_str = (request.form.get("date") or "").strip()
+
+    if not description or not amount_str or not category:
+        flash("Please fill description, amount, and category", "error")
+        return redirect(url_for("edit", expense_id=expense_id))
+    
+    try:
+        amount = float(amount_str)
+        if amount <= 0:
+            raise ValueError
+    except ValueError:
+        flash("Amount must be a positive number", "error")
+        return redirect(url_for("edit", expense_id=expense_id))
+    try:
+        d = datetime.strptime(date_str, "%Y-%m-%d").date() if date_str else dt_date.today()
+    except ValueError:
+        d = dt_date.today()
+    
+    e.description = description
+    e.amount = amount
+    e.category = category
+    e.date = d
+    
+    db.session.commit()
+    flash("Expense updated successfully!", "success")
+    return redirect(url_for("index"))
 
 
 if __name__ == "__main__":
