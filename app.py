@@ -82,6 +82,24 @@ def index():
     # print("Category Values:", cat_values)
 
 
+    day_q = db.session.query(Expense.date, func.sum(Expense.amount))
+
+    if start_date:
+        day_q = day_q.filter(Expense.date >= start_date)
+    
+    if end_date:
+        day_q = day_q.filter(Expense.date <= end_date)
+
+    if selected_category:
+        day_q = day_q.filter(Expense.category == selected_category)
+
+    day_rows = day_q.group_by(Expense.category).order_by(Expense.date).all()
+    # print("Category Rows:", day_rows)
+    day_labels = [d.isoformat() for d, _ in day_rows] # _ ignores the second value
+    # print("Category Labels:", cat_labels)
+    day_values = [round(float(s or 0), 2) for _, s in day_rows]
+    # print("Category Values:", cat_values)
+
 
     return render_template(
         
@@ -94,7 +112,9 @@ def index():
         end_str=end_str,
         selected_category=selected_category,
         cat_labels=cat_labels,
-        cat_values=cat_values
+        cat_values=cat_values,
+        day_labels=day_labels,
+        day_values=day_values
 
         )
 
@@ -139,6 +159,8 @@ def delete(expense_id):
     db.session.commit()
     flash("Expense deleted successfully!", "success")
     return redirect(url_for("index"))
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=4848)

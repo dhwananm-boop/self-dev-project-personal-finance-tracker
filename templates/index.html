@@ -267,6 +267,48 @@
         },
       });
     }
+
+    dayLabels = {{ (day_labels or []) | tojson }};
+    dayValues = {{ (day_values or []) | tojson }};
+
+    if (document.getElementById("dayChart")) {
+      const dayCtx = document.getElementById("dayChart").getContext("2d");
+
+      new Chart(dayCtx, {
+        type: "bar",
+        data: {
+          labels: dayLabels,
+          datasets: [
+            {
+              label: "Spending",
+              data: dayValues,
+              fill: false,
+              borderColor: "#3b82f6",
+              backgroundColor: "#3b82f6",
+              tension: 0.1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            x: {
+              ticks: { color: "#cbd5e1" },
+              grid: { color: "#334155" },
+            },
+            y: {
+              ticks: { color: "#cbd5e1" },
+              grid: { color: "#334155" },
+            },
+          },
+          plugins: {
+            legend: {
+              labels: { color: "#cbd5e1" },
+            },
+          },
+        },
+      });
+    }
+
   </script>
 
 </html>
