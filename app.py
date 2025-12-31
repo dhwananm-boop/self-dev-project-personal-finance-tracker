@@ -22,17 +22,56 @@ with app.app_context():
 
 CATEGORIES = ["Food", "Transport", "Rent", "Utilities", "Health"]
 
+def parse_date_or_none(s: str):
+    if not s:
+        return None
+    try:
+        return datetime.strptime(s, "&Y-%m-%d").date()
+    except ValueError:
+        return None
+    
+
 @app.route("/")
 def index():
 
-    expenses = Expense.query.order_by(Expense.date.desc(), Expense.id.desc()).all()
+    # Read Query Strings
+    start_str = (request.args.get("start") or "").strip()
+    end_str = (request.args.get("end") or "").strip()
+
+    selected_category = (request.args.get("category") or "").strip()
+
+
+    # Parsing Query Strings
+    start_date = parse_date_or_none(start_str)
+    end_date = parse_date_or_none(end_str)
+
+    if start_date and end_date and start_date > end_date:
+        flash("Start date cannot be after end date", "error")
+        start_date = end_date = None
+        start_str = end_str = ""
+
+    q = Expense.query
+    if start_date:
+        q = q.filter(Expense.date >= start_date)
+    if end_date:
+        q = q.filter(Expense.date <= end_date)
+    
+    if selected_category:
+        q = q.filter(Expense.category == selected_category)
+
+    expenses = q.order_by(Expense.date.desc(), Expense.id.desc()).all()
     total = round(sum(e.amount for e in expenses), 2)
     return render_template(
         
         "index.html", 
         expenses=expenses,
         categories=CATEGORIES,
+        today=date.today().isoformat(),
         total=total,
+        start_str=start_str,
+        end_str=end_str,
+        selected_category=selected_category
+        
 
         )
 

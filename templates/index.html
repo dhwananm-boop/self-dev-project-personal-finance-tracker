@@ -29,12 +29,14 @@
           class="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900 p-4"
         >
           <h2 class="text-lg font-semibold mb-3">Filters</h2>
-          <form 
+          <form method="get" action="{{url_for('index')}}"
             class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end pr-5"
           >
             <label class="text-sm">
               <span class="block mb-1 text-slate-300">Start</span>
               <input
+                name="start"
+                value="{{start_str or ''}}"
                 type="date"
                 class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
               />
@@ -42,19 +44,25 @@
             <label class="text-sm">
               <span class="block mb-1 text-slate-300">End</span>
               <input
+                name="end"
+                value="{{end_str or ''}}"
                 type="date"
                 class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
               />
             </label>
             <label class="text-sm md:col-span-2">
               <span class="block mb-1 text-slate-300">Category</span>
-              <select
+              <select name="category"
                 class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
               >
                 <option value="">All</option>
-                <option>Food</option>
-                <option>Transport</option>
-                <option>Utilities</option>
+
+                {% for c in categories %}
+                
+                <option value="{{c}}" {% if selected_category == c %} selected {% endif %}>{{c}}</option>
+
+                {% endfor %}
+
               </select>
             </label>
             <div class="flex gap-2">
@@ -66,7 +74,7 @@
               </button>
               <a
                 class="rounded-xl bg-slate-800 hover:bg-slate-700 px-4 py-2 border border-slate-700"
-                href="#"
+                href="{{url_for('index')}}"
                 >Reset</a
               >
             </div>
@@ -78,7 +86,7 @@
             <span
               class="inline-block rounded-xl border border-slate-700 bg-slate-800 px-3 py-1 font-semibold"
             >
-              $0.00
+              ${{ '%.2f'|format(total) or 0}}
             </span>
           </div>
 
@@ -121,6 +129,7 @@
                 <span class="mb-1 block text-slate-300">Date</span>
                 <input
                   name="date"
+                  value="{{today}}"
                   type="date"
                   class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
                 />
